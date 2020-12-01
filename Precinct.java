@@ -1,21 +1,33 @@
+package gairrymander;
+
 import java.util.*;
 
 public class Precinct implements Comparable<Precinct> {
+	private int code;
 	private int population;
 	private double percentD;
 	private boolean isD;
-	private List<Precinct> bordering;
+	private int district;
 	
-	public Precinct(int population, double percentD, List<Precinct> bordering) {
+	public Precinct(int code, int population, double percentD) {
+		this.code = code;
 		this.population = population;
 		this.percentD = percentD;
-		this.bordering = new LinkedList<Precinct>();
-		bordering.addAll(bordering);
 		this.isD = percentD >= 0.5;
+		district = -1; // initially unlabeled
 	}
 	
 	public int compareTo(Precinct o) {
 		return Double.compare(this.percentD, o.percentD);
 	}
 
+	public String toString() {
+		String str = "{" + code + ": ";
+		if (isD) {
+			str += "D";
+		} else {
+			str += "R";
+		}
+		return str + ", " + population + ", " + percentD * 100 + "% D}";
+	}
 }
