@@ -41,6 +41,18 @@ public class Graph<T> {
         }
         return count / 2;
     }
+
+    public List<T> getAdj(T s) {
+        return map.get(s);
+    }
+
+    // Returns arbitrary root vertex
+    public T getRoot() {
+        for (T s : map.keySet()) {
+            return s;
+        }
+        return null;
+    }
     
     // Returns true if a vertex is present.
     public boolean hasVertex(T s) {

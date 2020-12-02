@@ -3,11 +3,11 @@ package gairrymander;
 import java.util.*;
 
 public class Precinct implements Comparable<Precinct> {
-	private int code;
-	private int population;
-	private double percentD;
-	private boolean isD;
-	private int district;
+	public int code;
+	public int population;
+	public double percentD;
+	public boolean isD;
+	public int district;
 	
 	public Precinct(int code, int population, double percentD) {
 		this.code = code;
