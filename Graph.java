@@ -4,7 +4,7 @@ import java.util.*;
 
 // Generic undirected graph
 public class Graph<T> {
-    private Map<T, List<T>> map = new HashMap<>();
+    public Map<T, List<T>> map = new HashMap<>();
     
     // Adds a new isolated vertex to the graph
     public void addVertex(T s) {

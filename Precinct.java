@@ -28,6 +28,6 @@ public class Precinct implements Comparable<Precinct> {
 		} else {
 			str += "R";
 		}
-		return str + ", " + population + ", " + percentD * 100 + "% D}";
+		return str + ", " + district + ", " + population + ", " + percentD * 100 + "% D}";
 	}
 }
