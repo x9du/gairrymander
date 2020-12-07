@@ -98,4 +98,37 @@ public class Gerrymanderer {
         }
         return result;
     }
+    
+    // pre: each line in the file contains three ints separated by commas. 
+    // 		these ints represent, in order:
+    //		the precinct code, the number of dem votes, the number of gop votes
+    // post: returns an array of precincts representing the data in the file
+    public Precinct[] fromFile(File file) {
+    	List<String> linesInFile = new ArrayList<String>();
+    	scannerToList(linesInFile, new Scanner(file));
+    	Precinct[] result = new Precinct[linesInFile.size()];
+    	for (int i = 0; i < result.length; i++) {
+    		result[i] = fromFileIndividual(new Scanner(linesInFile.get(i).replace(',', ' ').trim()));
+    	}
+    	return result;
+    }
+    
+    // adds each line in scanner to a list of strings
+    private void scannerToList(List<String> list, Scanner scanner) {
+    	while (scanner.hasNextLine()) {
+			list.add(scanner.nextLine());
+		}
+    }
+    
+    // pre: scanner contains three int tokens representing, in order:
+    // 		the precinct code, the number of dem votes, the number of gop votes
+    // post: returns a precinct with these values
+    private Precinct fromFileIndividual(Scanner scanner) {
+    	int code = scanner.nextInt();
+    	int demVotes = scanner.nextInt();
+    	double demVotesDouble = demVotes;
+    	int pop = demVotes + scanner.nextInt();
+    	double popDouble = pop;
+    	return new Precinct(code, pop, demVotesDouble / popDouble);
+    }
 }
