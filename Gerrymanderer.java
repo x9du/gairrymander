@@ -1,6 +1,7 @@
 package gairrymander;
 
 import java.util.*;
+import java.io.*;
 
 public class Gerrymanderer {
     private int population;
@@ -99,22 +100,24 @@ public class Gerrymanderer {
         return result;
     }
     
-    // pre: each line in the file contains three ints separated by commas. 
+    // pre: each line in the csv file contains three ints separated by commas. 
     // 		these ints represent, in order:
     //		the precinct code, the number of dem votes, the number of gop votes
     // post: returns an array of precincts representing the data in the file
-    public Precinct[] fromFile(File file) {
+    public static Precinct[] fromFile(File file) throws FileNotFoundException {
     	List<String> linesInFile = new ArrayList<String>();
     	scannerToList(linesInFile, new Scanner(file));
     	Precinct[] result = new Precinct[linesInFile.size()];
     	for (int i = 0; i < result.length; i++) {
-    		result[i] = fromFileIndividual(new Scanner(linesInFile.get(i).replace(',', ' ').trim()));
+    		String temp = linesInFile.get(i).replace(',', ' ').trim();
+    		result[i] = fromFileIndividual(new Scanner(temp));
     	}
     	return result;
     }
     
     // adds each line in scanner to a list of strings
-    private void scannerToList(List<String> list, Scanner scanner) {
+    private static void scannerToList(List<String> list, Scanner scanner) {
+    	list.add(scanner.nextLine().substring(3));
     	while (scanner.hasNextLine()) {
 			list.add(scanner.nextLine());
 		}
@@ -123,7 +126,7 @@ public class Gerrymanderer {
     // pre: scanner contains three int tokens representing, in order:
     // 		the precinct code, the number of dem votes, the number of gop votes
     // post: returns a precinct with these values
-    private Precinct fromFileIndividual(Scanner scanner) {
+    private static Precinct fromFileIndividual(Scanner scanner) {
     	int code = scanner.nextInt();
     	int demVotes = scanner.nextInt();
     	double demVotesDouble = demVotes;
