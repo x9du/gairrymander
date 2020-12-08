@@ -31,7 +31,8 @@ public class Gerrymanderer {
         gerry.g.addVertex(precincts[5], Arrays.asList(precincts[2], precincts[4]));
         System.out.println("average district population " + population / numDistricts);
         // System.out.println(gerry.g);
-        gerry.generateAllDistricts(population / numDistricts);
+        // gerry.generateAllDistricts(population / numDistricts);
+        System.out.println(gerry.gerrymander(population / numDistricts, true));
     }
 
     public Gerrymanderer(int population, int numPrecincts, int numDistricts){
@@ -42,17 +43,89 @@ public class Gerrymanderer {
         this.g = new Graph<>();
     }
 
-    public void gerrymander() {
-
+    public Set<District> gerrymander(int precinctPop, boolean dem) {
+        return gerrymander(g.getRoot(), new HashSet<>(Arrays.asList(precincts)), 0, new District(), precinctPop, dem);
     }
 
+    public Set<District> gerrymander(Precinct root, Set<Precinct> unvisited, int nextDistrict, District district, int precinctPop, boolean dem) {
+        // System.out.print(root.code + " ");
+        if (precinctPop < 0 - error) {
+            // System.out.println(":(");
+            return null;
+        } else if (precinctPop <= 0 || precinctPop <= error) { // If this district full, generate next district
+            // System.out.println(":)");
+            if (unvisited.size() == 0) {
+                Set<District> districts = new HashSet<>();
+                districts.add(new District(district));
+                // System.out.println(districts);
+                return districts;
+            }
+            Set<District> districts = gerrymander(root, unvisited, nextDistrict + 1, new District(), population / numDistricts, dem);
+            if (districts != null) {
+                districts.add(district);
+            }
+            // System.out.println(root.code + " " + districts);
+            return districts;
+        } else {
+            // System.out.println(":|");
+            unvisited.remove(root);
+            root.district = nextDistrict;
+            district.add(root);
+            Set<District> districts = null;
+            Iterator<Precinct> i = g.getAdj(root).listIterator();
+            while (i.hasNext()) {
+                Precinct p = i.next();
+                if (p.district == -1) {
+                    Set<District> temp = gerrymander(p, unvisited, nextDistrict, new District(district), precinctPop - root.population, dem);
+                    // System.out.println(root.code + " " + temp);
+                    districts = optimal(districts, temp, dem);
+                }
+            }
+            if (unvisited.size() == 0) {
+                districts = gerrymander(new Precinct(root), unvisited, nextDistrict, district, precinctPop - root.population, dem);
+            }
+            unvisited.add(root);
+            root.district = -1;
+            district.remove(root);
+            // System.out.println(root.code + " " + districts);
+            return districts;
+        }
+    }
+
+    // Return set of districts with most districts won for party, if wins equal then highest sum of %
+    // party vote for all the districts the party won. If one null, returns the other. If both null,
+    // returns null.
+    private Set<District> optimal(Set<District> districts1, Set<District> districts2, boolean dem) {
+        if (districts1 == null) {
+            return districts2;
+        } else if (districts2 == null) {
+            return districts1;
+        }
+        double[] wins1 = wins(districts1, dem);
+        double[] wins2 = wins(districts2, dem);
+        if (wins1[0] > wins2[0] || (wins1[0] == wins2[0] && wins1[1] >= wins2[1])) {
+            return districts1;
+        }
+        return districts2;
+    }
+
+    private double[] wins(Set<District> districts, boolean dem) {
+        double[] wins = new double[2];
+        for (District d : districts) {
+            if (d.isD() == dem) {
+                wins[0]++;
+                wins[1] += d.winPercent();
+            }
+        }
+        return wins;
+    }
     
     public void generateAllDistricts(int precinctPop) {
         generateAllDistricts(g.getRoot(), new HashSet<>(Arrays.asList(precincts)), 0, precinctPop);
     }
 
     private void generateAllDistricts(Precinct root, Set<Precinct> unvisited, int nextDistrict, int precinctPop) {
-        System.out.println(root.code + " ");
+        System.out.print(root.code + " ");
         if (precinctPop < 0 - error) {
             System.out.println(":(");
             return;
