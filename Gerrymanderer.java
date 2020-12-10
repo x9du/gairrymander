@@ -6,17 +6,20 @@ import java.io.*;
 public class Gerrymanderer {
     private int population;
     private int numPrecincts;
-    private int numDistricts;
+    private static int numDistricts;
     private double error; // max error between actual and average district population
-    private Graph<Precinct> g;
+    private static Graph<Precinct> g;
     static Precinct[] precincts;
     private static Map<Arguments, Set<District>> subSolutions;
 
-    public static void main(String[] args) {      
-        // cindyTest();
+    public static void main(String[] args) throws FileNotFoundException {      
+        cindyTest();
         // test(36, 5); // can run on 36, can't on 40
+        // precincts = fromFile(new File("gairrymander\\oregon_data.csv"));
+        // System.out.println(Arrays.toString(precincts));
+        // rect(-1, 36, 5);
+        // System.out.println(" 0".trim());
     }
-
     
     private static void test(int numPrecincts, int numDistricts) {
         Random rand = new Random();
@@ -55,8 +58,8 @@ public class Gerrymanderer {
             gerry.g.addVertex(precincts[i], adj);
         }
         System.out.println(gerry.g);
-        // System.out.println("average district population " + population / 5);
-        // System.out.println(gerry.gerrymander(population / 5, true));
+        // System.out.println("average district population " + population / numDistricts);
+        // System.out.println(gerry.gerrymander(population / numDistricts, true));
         // System.out.println(gerry.subSolutions);
     }
 
@@ -70,6 +73,7 @@ public class Gerrymanderer {
             precincts[i] = new Precinct(i, precinctPop, rand.nextDouble());
             population += precinctPop;
         }
+        System.out.println(precincts[0].toJSON());
 
         Gerrymanderer gerry = new Gerrymanderer(population, precincts.length, numDistricts);
         gerry.g.addVertex(precincts[0], Arrays.asList(precincts[1], precincts[2], precincts[3]));
@@ -80,8 +84,12 @@ public class Gerrymanderer {
         gerry.g.addVertex(precincts[5], Arrays.asList(precincts[2], precincts[4]));
         System.out.println("average district population " + population / numDistricts);
         // System.out.println(gerry.g);
-        // gerry.generateAllDistricts(population / numDistricts);
-        // System.out.println(gerry.gerrymander(population / numDistricts, true));
+        gerry.generateAllDistricts(population / numDistricts);
+        Set<District> districts = gerry.gerrymander(population / numDistricts, true);
+        labelPrecincts(districts);
+        // System.out.println(gerry.g.getEdges());
+        System.out.println(gerry.toJSON());
+        // System.out.println(districts);
         // subSolutions = new HashMap<>();
         // System.out.println(gerry.gerrymander2(population / numDistricts, true));
         // System.out.println(gerry.pack(population / numDistricts, true));
@@ -286,6 +294,68 @@ public class Gerrymanderer {
         return districts2;
     }
 
+    private static void labelPrecincts(Set<District> districts) {
+        int n = 0;
+        Map<Precinct, Integer> labeledPrecincts = new HashMap<>();
+        for (District d : districts) {
+            for (Precinct p : d.precincts) {
+                labeledPrecincts.put(p, n);
+            }
+            n++;
+        }
+
+        // If precinct unlabeled, assign to district of any adjacent precinct
+        for (int i = 0; i < precincts.length; i++) {
+            if (labeledPrecincts.containsKey(precincts[i])) {
+                precincts[i].district = labeledPrecincts.get(precincts[i]);
+            } else {
+                // loop through adjacent precincts, assign district. If still -1, random value
+                Iterator<Precinct> it = g.getAdj(precincts[i]).listIterator();
+                while (it.hasNext()) {
+                    Precinct p = it.next();
+                    if (p.district != -1) {
+                        precincts[i].district = p.district;
+                        break;
+                    }
+                }
+                if (precincts[i].district == -1) {
+                    precincts[i].district = (int) (Math.random() * numDistricts);
+                }
+            }
+        }
+    }
+
+    public String toJSON() {
+        StringBuilder sb = new StringBuilder("{ \"nodes\":{ ");
+        for (Precinct p : g.map.keySet()) {
+            sb.append(p.code);
+            sb.append(':');
+            sb.append(p.toJSON());
+            sb.append(", ");
+        }
+        sb.delete(sb.length() - 2, sb.length());
+        sb.append(" }, \"edges\":[");
+        for (Set<Precinct> pair : g.getEdges()) {
+            sb.append("{ ");
+            String str = "from";
+            for (Precinct p : pair) {
+                sb.append("\"");
+                sb.append(str);
+                sb.append("\":\"");
+                sb.append(p.code);
+                sb.append("\"");
+                if (str.length() == 4) {
+                    sb.append(", ");
+                }
+                str = "to";
+            }
+            sb.append(" }, ");
+        }
+        sb.delete(sb.length() - 2, sb.length());
+        sb.append("] }");
+        return sb.toString();
+    }
+
     private double[] wins(Set<District> districts, boolean dem) {
         double[] wins = new double[2];
         for (District d : districts) {
@@ -350,39 +420,39 @@ public class Gerrymanderer {
         return result;
     }
     
-    // pre: each line in the csv file contains three ints separated by commas. 
-    // 		these ints represent, in order:
-    //		the precinct code, the number of dem votes, the number of gop votes
+        // pre: each line in the csv file contains three ints separated by commas. 
+    //      these ints represent, in order:
+    //      the precinct code, the number of dem votes, the number of gop votes
     // post: returns an array of precincts representing the data in the file
     public static Precinct[] fromFile(File file) throws FileNotFoundException {
-    	List<String> linesInFile = new ArrayList<String>();
-    	scannerToList(linesInFile, new Scanner(file));
-    	Precinct[] result = new Precinct[linesInFile.size()];
-    	for (int i = 0; i < result.length; i++) {
-    		String temp = linesInFile.get(i).replace(',', ' ').trim();
-    		result[i] = fromFileIndividual(new Scanner(temp));
-    	}
-    	return result;
+        List<String> linesInFile = new ArrayList<String>();
+        scannerToList(linesInFile, new Scanner(file));
+        Precinct[] result = new Precinct[linesInFile.size()];
+        for (int i = 0; i < result.length; i++) {
+            String temp = linesInFile.get(i).replace(',', ' ');//.trim();
+            System.out.println(temp.trim());
+            result[i] = fromFileIndividual(new Scanner(temp.trim()));
+        }
+        return result;
     }
     
     // adds each line in scanner to a list of strings
     private static void scannerToList(List<String> list, Scanner scanner) {
-    	list.add(scanner.nextLine().substring(3));
-    	while (scanner.hasNextLine()) {
-			list.add(scanner.nextLine());
-		}
+        while (scanner.hasNextLine()) {
+            list.add(scanner.nextLine());
+        }
     }
     
     // pre: scanner contains three int tokens representing, in order:
-    // 		the precinct code, the number of dem votes, the number of gop votes
+    //      the precinct code, the number of dem votes, the number of gop votes
     // post: returns a precinct with these values
     private static Precinct fromFileIndividual(Scanner scanner) {
-    	int code = scanner.nextInt();
-    	int demVotes = scanner.nextInt();
-    	double demVotesDouble = demVotes;
-    	int pop = demVotes + scanner.nextInt();
-    	double popDouble = pop;
-    	return new Precinct(code, pop, demVotesDouble / popDouble);
+        int code = scanner.nextInt();
+        int demVotes = scanner.nextInt();
+        double demVotesDouble = demVotes;
+        int pop = demVotes + scanner.nextInt();
+        double popDouble = pop;
+        return new Precinct(code, pop, demVotesDouble / popDouble);
     }
 
     private static class Arguments implements Comparable<Arguments> {

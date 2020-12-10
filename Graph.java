@@ -54,6 +54,19 @@ public class Graph<T> {
         return count / 2;
     }
 
+    public Set<Set<T>> getEdges() {
+        Set<Set<T>> edges = new HashSet<>();
+        for (T v1 : map.keySet()) {
+            for (T v2 : map.get(v1)) {
+                Set<T> pair = new HashSet<>();
+                pair.add(v1);
+                pair.add(v2);
+                edges.add(pair);
+            }
+        }
+        return edges;
+    }
+
     public List<T> getAdj(T s) {
         return map.get(s);
     }
