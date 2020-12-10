@@ -4,46 +4,50 @@ import java.util.*;
 import java.io.*;
 
 public class Gerrymanderer {
-    private int population;
-    private int numPrecincts;
-    private static int numDistricts;
-    private double error; // max error between actual and average district population
-    private static Graph<Precinct> g;
-    static Precinct[] precincts;
-    private static Map<Arguments, Set<District>> subSolutions;
+    public int population;
+    public int numPrecincts;
+    public int numDistricts;
+    public double error; // max error between actual and average district population
+    public Graph<Precinct> g;
+    public Precinct[] precincts;
+    public Map<Arguments, Set<District>> subSolutions;
 
-    public static void main(String[] args) throws FileNotFoundException {      
-        cindyTest();
+    public static void main(String[] args) throws FileNotFoundException {
+        // cindyTest();
+        // test(8, 2);
         // test(36, 5); // can run on 36, can't on 40
-        // precincts = fromFile(new File("gairrymander\\oregon_data.csv"));
+        // Precinct[] precincts = fromFile(new File("gairrymander\\oregon_data.csv"));
+        // Gerrymanderer gerry = new Gerrymanderer(population(precincts), precincts.length, 5, precincts);
         // System.out.println(Arrays.toString(precincts));
-        // rect(-1, 36, 5);
-        // System.out.println(" 0".trim());
+        // gerry.rect();
+        // System.out.println("average district population " + gerry.population / gerry.numDistricts);
+        // System.out.println(gerry.gerrymander(gerry.population / gerry.numDistricts, true));
     }
     
     private static void test(int numPrecincts, int numDistricts) {
         Random rand = new Random();
-        precincts = new Precinct[numPrecincts];
+        Precinct[] precincts = new Precinct[numPrecincts];
         int population = 0;
         for (int i = 0; i < precincts.length; i++) {
             int precinctPop = 100/*rand.nextInt(1000)*/;
             precincts[i] = new Precinct(i, precinctPop, rand.nextDouble());
             population += precinctPop;
         }
-        rect(population, numPrecincts, numDistricts);
+        Gerrymanderer gerry = new Gerrymanderer(population, precincts.length, numDistricts, precincts);
+        gerry.rect();
+        // System.out.println(gerry.g);
+        System.out.println("average district population " + population / numDistricts);
+        System.out.println(gerry.gerrymander(population / numDistricts, true));
+        // System.out.println(gerry.subSolutions);
     }
 
     // pre: numPrecincts >= numDistricts, precincts array initialized
     // post: Constructs rectangular graph of cols numPrecincts / numDistricts, min rows numDistricts
     // extra row for leftover
-    private static void rect(int population, int numPrecincts, int numDistricts) {
+    public void rect() {
         if (population == -1) {
-            population = 0;
-            for (Precinct p : precincts) {
-                population += p.population;
-            }
+            population = population(precincts);
         }
-        Gerrymanderer gerry = new Gerrymanderer(population, precincts.length, numDistricts);
         int n = numPrecincts / numDistricts;
         for (int i = 0; i < precincts.length; i++) {
             List<Precinct> adj = new LinkedList<>();
@@ -55,17 +59,21 @@ public class Gerrymanderer {
             if (t >= 0) adj.add(precincts[t]);
             int b = i + n;
             if (b < precincts.length) adj.add(precincts[b]);
-            gerry.g.addVertex(precincts[i], adj);
+            g.addVertex(precincts[i], adj);
         }
-        System.out.println(gerry.g);
-        // System.out.println("average district population " + population / numDistricts);
-        // System.out.println(gerry.gerrymander(population / numDistricts, true));
-        // System.out.println(gerry.subSolutions);
+    }
+
+    public static int population(Precinct[] precincts) {
+        int population = 0;
+        for (Precinct p : precincts) {
+            population += p.population;
+        }
+        return population;
     }
 
     private static void cindyTest() {
         Random rand = new Random();
-        precincts = new Precinct[6];
+        Precinct[] precincts = new Precinct[6];
         int population = 0;
         int numDistricts = 2;
         for (int i = 0; i < 6; i++) {
@@ -73,9 +81,8 @@ public class Gerrymanderer {
             precincts[i] = new Precinct(i, precinctPop, rand.nextDouble());
             population += precinctPop;
         }
-        System.out.println(precincts[0].toJSON());
 
-        Gerrymanderer gerry = new Gerrymanderer(population, precincts.length, numDistricts);
+        Gerrymanderer gerry = new Gerrymanderer(population, precincts.length, numDistricts, precincts);
         gerry.g.addVertex(precincts[0], Arrays.asList(precincts[1], precincts[2], precincts[3]));
         gerry.g.addVertex(precincts[1], Arrays.asList(precincts[0], precincts[3]));
         gerry.g.addVertex(precincts[2], Arrays.asList(precincts[0], precincts[3], precincts[5]));
@@ -84,24 +91,25 @@ public class Gerrymanderer {
         gerry.g.addVertex(precincts[5], Arrays.asList(precincts[2], precincts[4]));
         System.out.println("average district population " + population / numDistricts);
         // System.out.println(gerry.g);
-        gerry.generateAllDistricts(population / numDistricts);
+        // gerry.generateAllDistricts(population / numDistricts);
         Set<District> districts = gerry.gerrymander(population / numDistricts, true);
-        labelPrecincts(districts);
-        // System.out.println(gerry.g.getEdges());
-        System.out.println(gerry.toJSON());
         // System.out.println(districts);
+        gerry.labelPrecincts(districts);
+        // System.out.println(gerry.g.getEdges());
+        System.out.println(gerry.toJSON());        
         // subSolutions = new HashMap<>();
         // System.out.println(gerry.gerrymander2(population / numDistricts, true));
         // System.out.println(gerry.pack(population / numDistricts, true));
         // System.out.println(gerry.subSolutions);
     }
 
-    public Gerrymanderer(int population, int numPrecincts, int numDistricts){
+    public Gerrymanderer(int population, int numPrecincts, int numDistricts, Precinct[] precincts){
         this.population = population;
         this.numPrecincts = numPrecincts;
         this.numDistricts = numDistricts;
         this.error = 0.1 * population / numDistricts; // probably want to change this later
         this.g = new Graph<>();
+        this.precincts = precincts;
         this.subSolutions = new HashMap<>();
     }
 
@@ -294,7 +302,7 @@ public class Gerrymanderer {
         return districts2;
     }
 
-    private static void labelPrecincts(Set<District> districts) {
+    public void labelPrecincts(Set<District> districts) {
         int n = 0;
         Map<Precinct, Integer> labeledPrecincts = new HashMap<>();
         for (District d : districts) {
@@ -304,11 +312,10 @@ public class Gerrymanderer {
             n++;
         }
 
-        // If precinct unlabeled, assign to district of any adjacent precinct
         for (int i = 0; i < precincts.length; i++) {
             if (labeledPrecincts.containsKey(precincts[i])) {
                 precincts[i].district = labeledPrecincts.get(precincts[i]);
-            } else {
+            } else {// If precinct unlabeled, assign to district of any adjacent precinct
                 // loop through adjacent precincts, assign district. If still -1, random value
                 Iterator<Precinct> it = g.getAdj(precincts[i]).listIterator();
                 while (it.hasNext()) {
@@ -420,7 +427,7 @@ public class Gerrymanderer {
         return result;
     }
     
-        // pre: each line in the csv file contains three ints separated by commas. 
+    // pre: each line in the csv file contains three ints separated by commas. 
     //      these ints represent, in order:
     //      the precinct code, the number of dem votes, the number of gop votes
     // post: returns an array of precincts representing the data in the file
@@ -455,7 +462,7 @@ public class Gerrymanderer {
         return new Precinct(code, pop, demVotesDouble / popDouble);
     }
 
-    private static class Arguments implements Comparable<Arguments> {
+    private class Arguments implements Comparable<Arguments> {
         public final Set<Precinct> unvisited;
 
         public Arguments(Set<Precinct> unvisited) {
