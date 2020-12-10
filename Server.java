@@ -33,13 +33,13 @@ public class Server {
         gerry.labelPrecincts(districts);
         System.out.println(gerry.toJSON());*/
 
-        HttpServer server = HttpServer.create(new InetSocketAddress(PORT), 0);
+        HttpServer server = HttpServer.create(new InetSocketAddress("localhost", PORT), 0);
         server.createContext("/", (HttpExchange t) -> {
-            String html = Files.readString(Paths.get("Map.html"));
-            System.out.println(html);
+            String html = Files.readString(Paths.get("C:\\Users\\zhouc\\vscode-workspace\\gairrymander\\Map.html"));
             send(t, "text/html; charset=utf-8", html);
         });
         server.createContext("/query", (HttpExchange t) -> {
+            System.out.println("query");
             String party = parse("party", t.getRequestURI().getQuery().split("&"));
             boolean isD = party.equals("D");
             // send(t, "application/json", String.format(QUERY_TEMPLATE, "", ""));
