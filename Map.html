@@ -12,7 +12,7 @@
     <div id="map"></div>
     <p><a href="https://www.maptiler.com/copyright/" target="_blank">© MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">© OpenStreetMap contributors</a></p>
     <script>
-      var map = L.map('map').setView([-0.70311, -30.46876], 2);
+      var map = L.map('map').setView([43.96044924, -120.64262058], 7);
       L.tileLayer('https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=VXgT26eQK2XrfA3L0Yef',{
         tileSize: 512,
         zoomOffset: -1,
@@ -20,6 +20,14 @@
         attribution: "\u003ca href=\"https://www.maptiler.com/copyright/\" target=\"_blank\"\u003e\u0026copy; MapTiler\u003c/a\u003e \u003ca href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\"\u003e\u0026copy; OpenStreetMap contributors\u003c/a\u003e",
         crossOrigin: true
       }).addTo(map);
+
+      var latlngs = [[46, -124],[46, -117],[42, -117],[42, -124]];
+      var polygon = L.polygon(latlngs, {color: 'blue'}).addTo(map);
+      //var latlngs2 = [[44, -121],[44, -119],[43, -119],[43, -121]];
+      //var polygon2 = L.polygon(latlngs2, {color: 'red'}).addTo(map);
     </script>
+
+
+  
   </body>
 </html>
