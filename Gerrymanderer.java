@@ -13,7 +13,7 @@ public class Gerrymanderer {
     public Map<Arguments, Set<District>> subSolutions;
 
     public static void main(String[] args) throws FileNotFoundException {
-        // cindyTest();
+        cindyTest();
         // test(8, 2);
         // test(36, 5); // can run on 36, can't on 40
         // Precinct[] precincts = fromFile(new File("gairrymander\\oregon_data.csv"));
@@ -344,8 +344,9 @@ public class Gerrymanderer {
     public String toJSON() {
         StringBuilder sb = new StringBuilder("{ \"nodes\":{ ");
         for (Precinct p : g.map.keySet()) {
+            sb.append("\"p");
             sb.append(p.code);
-            sb.append(':');
+            sb.append("\":");
             sb.append(p.toJSON());
             sb.append(", ");
         }
