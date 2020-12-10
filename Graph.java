@@ -27,6 +27,18 @@ public class Graph<T> {
         map.get(source).add(destination);
         map.get(destination).add(source);
     }
+
+    // pre: Generic type T must be comparable
+    // post: Sorts each adjacency list in natural order if given true, reverse order if given false
+    public void sortAdj(boolean natOrder) {
+        for (T s : map.keySet()) {
+            if (natOrder) {
+                Collections.sort((List<Comparable>) map.get(s));
+            } else {
+                Collections.sort((List<Comparable>) map.get(s), Collections.reverseOrder());
+            }
+        }
+    }
     
     // Returns the number of vertices
     public int getVertexCount() {
