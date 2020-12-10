@@ -21,10 +21,19 @@
         crossOrigin: true
       }).addTo(map);
 
-      var latlngs = [[46, -124],[46, -117],[42, -117],[42, -124]];
-      var polygon = L.polygon(latlngs, {color: 'blue'}).addTo(map);
-      //var latlngs2 = [[44, -121],[44, -119],[43, -119],[43, -121]];
-      //var polygon2 = L.polygon(latlngs2, {color: 'red'}).addTo(map);
+      
+      var graph = JSON.parse('{ "nodes":{ "precinct1code":{ "latlngs":[[0, 0], [0, 1], [1, 1], [1, 0]], "percentD":0.0, "isD":true, "district":0 }, "precinct2code":{ "latlngs":[[1, 1], [1, 2], [2, 2], [2, 1]], "percentD":0.0, "isD":true, "district":0 }},"edges":[ { "from":"precinct1code", "to":"precinct2code" }]}');
+      var nodes = graph.nodes;
+      var edges = graph.edges;
+      for (var precinct in nodes) {
+        var latlngs = nodes[precinct].latlngs;
+        var polygon = L.polygon(latlngs, {color: 'blue'}).addTo(map);
+        polygon.bindPopup("Precinct");
+      }
+      for (var edge in edges) {
+        var latlngs = nodes[edge.from].latlngs;
+        var polyline = L.polyline(latlngs, {color: 'red'}).addTo(map);
+      }
     </script>
 
 
