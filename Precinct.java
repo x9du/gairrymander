@@ -45,8 +45,8 @@ public class Precinct implements Comparable<Precinct> {
 		double w = 0.2;
 		double[][] latlngs = new double[4][2];
 		latlngs[0][0] = x; latlngs[0][1] = y;
-		latlngs[1][0] = x; latlngs[1][1] = y - w;
-		latlngs[2][0] = x - w; latlngs[2][1] = y - w;
+		latlngs[1][0] = x; latlngs[1][1] = y + w;
+		latlngs[2][0] = x - w; latlngs[2][1] = y + w;
 		latlngs[3][0] = x - w; latlngs[3][1] = y;
 		StringBuilder sb = new StringBuilder("{ \"latlngs\":[");
 		for (int i = 0; i < latlngs.length; i++) {

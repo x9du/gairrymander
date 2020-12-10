@@ -49,7 +49,16 @@ public class Gerrymanderer {
             population = population(precincts);
         }
         int n = numPrecincts / numDistricts;
+        double lat1 = 46; double lng1 = -124;
+        double lat2 = 42; double lng2 = -117;
+        double lat = Math.abs(lat1 - lat2) / numDistricts;
+        if (numDistricts * n < numPrecincts) {
+            lat++;
+        }
+        double lng = Math.abs(lng1 - lng2) / n;
         for (int i = 0; i < precincts.length; i++) {
+            precincts[i].x = lat1 - lat * (i / n);
+            precincts[i].y = lng1 + lng * (i % n);
             List<Precinct> adj = new LinkedList<>();
             int l = i - 1;
             if (i % n != 0) adj.add(precincts[l]);
