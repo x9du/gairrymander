@@ -1,5 +1,7 @@
 package gairrymander;
 
+import java.util.*;
+
 public class Precinct implements Comparable<Precinct> {
 	public int code;
 	public int population;
@@ -25,6 +27,20 @@ public class Precinct implements Comparable<Precinct> {
 	
 	public int compareTo(Precinct o) {
 		return Double.compare(this.percentD, o.percentD);
+	}
+
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		} else if (!(o instanceof Precinct)) {
+			return false;
+		}
+		Precinct other = (Precinct) o;
+		return code == other.code;
+	}
+
+	public int hashCode() {
+		return Objects.hash(code);
 	}
 
 	public String toString() {
