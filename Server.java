@@ -39,29 +39,39 @@ public class Server {
             send(t, "text/html; charset=utf-8", html);
         });
         server.createContext("/query", (HttpExchange t) -> {
-            System.out.println("query");
-            String party = parse("party", t.getRequestURI().getQuery().split("&"));
+            String[] query = t.getRequestURI().getQuery().split("&");
+            System.out.println("query: " + Arrays.toString(query));
+            String party = parse("party", query);
+            String algo = parse("algo", query);
             boolean isD = party.equals("D");
+
             // send(t, "application/json", String.format(QUERY_TEMPLATE, "", ""));
             // return;
-            // Precinct[] precincts = Gerrymanderer.fromFile(new File("gairrymander\\oregon_data.csv"));
-            // int population = Gerrymanderer.population(precincts);
-            // int numDistricts = 5;
+
+            Precinct[] precincts = Gerrymanderer.fromFile(new File("gairrymander\\oregon_data.csv"));
+            int population = Gerrymanderer.population(precincts);
+            int numDistricts = 5;
+            
             // Test begin
-            Random rand = new Random();
-            Precinct[] precincts = new Precinct[8];
+            /*Random rand = new Random();
+            Precinct[] precincts = new Precinct[36];
             int population = 0;
-            int numDistricts = 2;
+            int numDistricts = 5;
             for (int i = 0; i < precincts.length; i++) {
-                int precinctPop = 100;
+                int precinctPop = rand.nextInt(100);
                 precincts[i] = new Precinct(i, precinctPop, rand.nextDouble());
                 population += precinctPop;
-            }
+            }*/
             // Test end
             Gerrymanderer gerry = new Gerrymanderer(population, precincts.length, numDistricts, precincts);
             gerry.rect();
             System.out.println("average district population " + gerry.population / gerry.numDistricts);
-            Set<District> districts = gerry.gerrymander(gerry.population / gerry.numDistricts, isD);
+            Set<District> districts = null;
+            if (algo.equals("T")) {
+                districts = gerry.gerrymander(gerry.population / gerry.numDistricts, isD);
+            } else {
+                districts = gerry.pack(gerry.population / gerry.numDistricts, isD);
+            }            
             // System.out.println(districts);
             gerry.labelPrecincts(districts);
             System.out.println(gerry.toJSON());

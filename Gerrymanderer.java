@@ -13,8 +13,8 @@ public class Gerrymanderer {
     public Map<Arguments, Set<District>> subSolutions;
 
     public static void main(String[] args) throws FileNotFoundException {
-        cindyTest();
-        // test(8, 2);
+        // cindyTest();
+        test(36, 5);
         // test(36, 5); // can run on 36, can't on 40
         // Precinct[] precincts = fromFile(new File("gairrymander\\oregon_data.csv"));
         // Gerrymanderer gerry = new Gerrymanderer(population(precincts), precincts.length, 5, precincts);
@@ -29,7 +29,7 @@ public class Gerrymanderer {
         Precinct[] precincts = new Precinct[numPrecincts];
         int population = 0;
         for (int i = 0; i < precincts.length; i++) {
-            int precinctPop = 100/*rand.nextInt(1000)*/;
+            int precinctPop = /*100*/rand.nextInt(1000);
             precincts[i] = new Precinct(i, precinctPop, rand.nextDouble());
             population += precinctPop;
         }
@@ -37,7 +37,15 @@ public class Gerrymanderer {
         gerry.rect();
         // System.out.println(gerry.g);
         System.out.println("average district population " + population / numDistricts);
-        System.out.println(gerry.gerrymander(population / numDistricts, true));
+        Set<District> districts = gerry.gerrymander(population / numDistricts, true);
+        for (District d : districts) {
+            System.out.print(population(d.precincts) + " ");
+            System.out.println(d.population);
+        }
+        System.out.println(districts.size() + " districts");
+        gerry.labelPrecincts(districts);
+        // System.out.println(districts);
+        System.out.println(gerry.toJSON());
         // System.out.println(gerry.subSolutions);
     }
 
@@ -80,6 +88,14 @@ public class Gerrymanderer {
         return population;
     }
 
+    public static int population(Set<Precinct> precincts) {
+        int population = 0;
+        for (Precinct p : precincts) {
+            population += p.population;
+        }
+        return population;
+    }
+
     private static void cindyTest() {
         Random rand = new Random();
         Precinct[] precincts = new Precinct[6];
@@ -105,7 +121,7 @@ public class Gerrymanderer {
         // System.out.println(districts);
         gerry.labelPrecincts(districts);
         // System.out.println(gerry.g.getEdges());
-        System.out.println(gerry.toJSON());        
+        System.out.println(gerry.toJSON());
         // subSolutions = new HashMap<>();
         // System.out.println(gerry.gerrymander2(population / numDistricts, true));
         // System.out.println(gerry.pack(population / numDistricts, true));
@@ -122,7 +138,7 @@ public class Gerrymanderer {
         this.subSolutions = new HashMap<>();
     }
 
-    /*public Set<District> pack(int precinctPop, boolean dem) {
+    public Set<District> pack(int precinctPop, boolean dem) {
         g.sortAdj(dem);
         return pack(g.getRoot(), new HashSet<>(Arrays.asList(precincts)), new District(), precinctPop, dem);
     }
@@ -130,7 +146,7 @@ public class Gerrymanderer {
     public Set<District> pack(Precinct root, Set<Precinct> unvisited, District district, int precinctPop, boolean dem) {
         if (precinctPop < 0 - error) {
             return null;
-        } else if (precinctPop <= 0 || precinctPop <= error) { // If this district full, generate next district
+        } else if (precinctPop >= 0 - error/*<= 0*/ || precinctPop <= error) { // If this district full, generate next district
             if (unvisited.size() == 0) {
                 Set<District> districts = new HashSet<>();
                 districts.add(new District(district));
@@ -169,7 +185,7 @@ public class Gerrymanderer {
             }
         }
         return districts;
-    }*/
+    }
 
     public Set<District> gerrymander(int precinctPop, boolean dem) {
         return gerrymander(g.getRoot(), new HashSet<>(Arrays.asList(precincts)), new District(), precinctPop, dem);
@@ -182,10 +198,10 @@ public class Gerrymanderer {
             return null;
         } else if (precinctPop <= 0 || precinctPop <= error) { // If this district full, generate next district
             // System.out.println(":)");
-            Arguments args = new Arguments(new HashSet<>(unvisited));
-            if (subSolutions.containsKey(args)) {
-                return subSolutions.get(args);
-            }
+            // Arguments args = new Arguments(new HashSet<>(unvisited));
+            // if (subSolutions.containsKey(args)) {
+            //     return subSolutions.get(args);
+            // }
             if (unvisited.size() == 0) {
                 Set<District> districts = new HashSet<>();
                 districts.add(new District(district));
@@ -194,11 +210,11 @@ public class Gerrymanderer {
             }
             Set<District> districts = gerrymander(root, unvisited, new District(), population / numDistricts, dem);
             if (districts != null) {
-                subSolutions.put(args, new HashSet<>(districts));
+                // subSolutions.put(args, new HashSet<>(districts));
                 districts.add(district);
-            } else {
-                subSolutions.put(args, null);
-            }
+            }// else {
+            //     subSolutions.put(args, null);
+            // }
             // System.out.println(root.code + " " + districts);
             return districts;
         } else {
@@ -315,6 +331,10 @@ public class Gerrymanderer {
         int n = 0;
         Map<Precinct, Integer> labeledPrecincts = new HashMap<>();
         for (District d : districts) {
+            if (n >= numDistricts) break;
+            if (Math.abs(d.population - population(d.precincts)) > error) {
+                continue;
+            }
             for (Precinct p : d.precincts) {
                 labeledPrecincts.put(p, n);
             }
@@ -358,7 +378,7 @@ public class Gerrymanderer {
             for (Precinct p : pair) {
                 sb.append("\"");
                 sb.append(str);
-                sb.append("\":\"");
+                sb.append("\":\"p");
                 sb.append(p.code);
                 sb.append("\"");
                 if (str.length() == 4) {
@@ -369,8 +389,36 @@ public class Gerrymanderer {
             sb.append(" }, ");
         }
         sb.delete(sb.length() - 2, sb.length());
-        sb.append("] }");
+        sb.append("], \"result\":\"");
+        sb.append(districtResults());
+        sb.append("\" }");
         return sb.toString();
+    }
+
+    private String districtResults() {
+        Map<Integer, District> map = new HashMap<>();
+        for (Precinct p : precincts) {
+            int n = p.district;
+            if (!map.containsKey(n)) {
+                map.put(n, new District());
+            }
+            map.get(n).add(p);
+        }
+        String str = "";
+        for (int i : map.keySet()) {
+            District d = map.get(i);
+            str += i + " ";
+            double percentD = 1.0 * d.popD / d.population;
+            // System.out.println(percentD);
+            if (percentD > 0.5) {
+                str += (int) (percentD * 100) + "% D, ";
+            } else if (percentD < 0.5) {
+                str += (int) ((1 - percentD) * 100) + "% R, ";
+            } else {
+                str += 50 + "% Tie, ";
+            }
+        }
+        return str;
     }
 
     private double[] wins(Set<District> districts, boolean dem) {
