@@ -35,7 +35,7 @@ public class Server {
 
         HttpServer server = HttpServer.create(new InetSocketAddress("localhost", PORT), 0);
         server.createContext("/", (HttpExchange t) -> {
-            String html = Files.readString(Paths.get("C:\\Users\\zhouc\\vscode-workspace\\gairrymander\\Map.html"));
+            String html = Files.readString(Paths.get("Map.html"));
             send(t, "text/html; charset=utf-8", html);
         });
         server.createContext("/query", (HttpExchange t) -> {
@@ -48,10 +48,10 @@ public class Server {
             // send(t, "application/json", String.format(QUERY_TEMPLATE, "", ""));
             // return;
 
-            Precinct[] precincts = Gerrymanderer.fromFile(new File("gairrymander\\oregon_data.csv"));
+            Precinct[] precincts = Gerrymanderer.fromFile(new File("oregon_data.csv"));
             int population = Gerrymanderer.population(precincts);
             int numDistricts = 5;
-            
+
             // Test begin
             /*Random rand = new Random();
             Precinct[] precincts = new Precinct[36];

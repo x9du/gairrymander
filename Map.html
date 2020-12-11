@@ -60,7 +60,7 @@
           var edges = graph.edges;
           var result = graph.result;
 
-          document.getElementById("test").innerHTML += result;
+          document.getElementById("test").innerHTML = "Districts: " + result;
 
           for (var precinct in nodes) {
             var latlngs = nodes[precinct].latlngs;
