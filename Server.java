@@ -48,10 +48,10 @@ public class Server {
             // send(t, "application/json", String.format(QUERY_TEMPLATE, "", ""));
             // return;
 
-            Precinct[] precincts = Gerrymanderer.fromFile(new File("oregon_data.csv"));
+            Precinct[] precincts = Gerrymanderer.fromFile(new File("oregon_data_text.txt"));
             int population = Gerrymanderer.population(precincts);
             int numDistricts = 5;
-
+            
             // Test begin
             /*Random rand = new Random();
             Precinct[] precincts = new Precinct[36];

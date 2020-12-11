@@ -14,14 +14,18 @@ public class Gerrymanderer {
 
     public static void main(String[] args) throws FileNotFoundException {
         // cindyTest();
-        test(36, 5);
+        // test(36, 5);
         // test(36, 5); // can run on 36, can't on 40
-        // Precinct[] precincts = fromFile(new File("gairrymander\\oregon_data.csv"));
-        // Gerrymanderer gerry = new Gerrymanderer(population(precincts), precincts.length, 5, precincts);
-        // System.out.println(Arrays.toString(precincts));
-        // gerry.rect();
-        // System.out.println("average district population " + gerry.population / gerry.numDistricts);
-        // System.out.println(gerry.gerrymander(gerry.population / gerry.numDistricts, true));
+
+        Precinct[] precincts = fromFile(new File("oregon_data_text.txt"));
+        boolean isD = true;
+        Gerrymanderer gerry = new Gerrymanderer(population(precincts), precincts.length, 5, precincts);
+        System.out.println(Arrays.toString(precincts));
+        gerry.rect();
+        System.out.println("average district population " + gerry.population / gerry.numDistricts);
+        Set<District> districts = gerry.gerrymander(gerry.population / gerry.numDistricts, isD);
+        gerry.labelPrecincts(districts);
+        System.out.println(gerry.toJSON());
     }
     
     private static void test(int numPrecincts, int numDistricts) {
@@ -494,15 +498,15 @@ public class Gerrymanderer {
         scannerToList(linesInFile, new Scanner(file));
         Precinct[] result = new Precinct[linesInFile.size()];
         for (int i = 0; i < result.length; i++) {
-            String temp = linesInFile.get(i).replace(',', ' ');//.trim();
-            System.out.println(temp.trim());
-            result[i] = fromFileIndividual(new Scanner(temp.trim()));
+            String temp = linesInFile.get(i).replace(',', ' ').trim();
+    		result[i] = fromFileIndividual(new Scanner(temp));
         }
         return result;
     }
     
     // adds each line in scanner to a list of strings
     private static void scannerToList(List<String> list, Scanner scanner) {
+        // list.add(scanner.nextLine().substring(3));
         while (scanner.hasNextLine()) {
             list.add(scanner.nextLine());
         }
