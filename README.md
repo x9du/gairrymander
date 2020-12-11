@@ -1,1 +1,10 @@
 # gairrymander
+[Watch our video explanation!](https://www.youtube.com/watch?v=CtlJit7J3JY)
+
+How to run our gAIrrymander project:
+1. Clone the repository to your local machine.
+2. Run `Server.java` in your IDE of choice, or open a terminal, `cd` into the folder that contains your cloned `gairrymander` folder, and enter `javac gairrymander/*.java && java gairrymander.Server`, and you should see the port (likely `8000`) printed in the terminal, indicating the server is running.
+3. Open a web browser and navigate to `http://localhost:8000/`, which should display a map of Oregon. Choose a party and algorithm and click the Submit button. A graph of counties should appear momentarily, as well as the election results of each district in the top right corner!
+4. If you encounter `FileNotFound` errors, try replacing the file paths in `Gerrymanderer.java` line 20 and `Server.java` lines 38, 51 with the absolute paths to the files.
+
+gAIrrymander is a web app that takes the user input of a political party and specified algorithm and then displays the optimal gerrymandering of the state so that the chosen political party has a majority in the most districts. Gerrymandering is the act of redistricting the congressional district boundaries to favor a certain party. This takes place every ten years after the census. Gerrymander appears in two main forms: cracking and packing. The first algorithm, TORTOISE, creates an optimal solution to gerrymander a state while the second algorithm, HARE, uses the packing strategy to gerrymander a state. Because it has to check all combinations, the TORTOISE algorithm runs slower than the HARE algorithm. At the moment, our program displays the districts in a rectangular grid to represent the graph inside the map of Oregon and a label describing the political party and which numbered district it is a part of. This project can be scaled up to work with other states given more state voting data. The graph can also be improved to show the geographical size of the gerrymandered states. The purpose of this is to give a fun way for students to learn about gerrymandering.
